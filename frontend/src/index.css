@@ -180,3 +180,76 @@ th {
   color: #334155;
   font-size: 1.5rem;
 }
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text-color);
+  display: inline-block;
+}
+
+.btn-small:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-success {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.btn-success:hover {
+  background-color: #059669;
+}
+
+.btn-danger {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.status-passed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-failed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+select, input[type="number"] {
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+}

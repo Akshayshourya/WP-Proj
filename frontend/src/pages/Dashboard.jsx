@@ -5,7 +5,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalCompanies: 0,
     totalApplicants: 0,
-    totalEligible: 0
+    totalEligible: 0,
+    totalSelected: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -17,6 +18,7 @@ const Dashboard = () => {
         
         let totalApplicants = 0;
         let totalEligible = 0;
+        let totalSelected = 0;
 
         companies.forEach(company => {
           totalApplicants += company.applicants.length;
@@ -26,12 +28,16 @@ const Dashboard = () => {
             company.allowedBranches.includes(app.branch)
           );
           totalEligible += eligible.length;
+
+          const selected = company.applicants.filter(app => app.offerStatus === 'Accepted');
+          totalSelected += selected.length;
         });
 
         setStats({
           totalCompanies: companies.length,
           totalApplicants,
-          totalEligible
+          totalEligible,
+          totalSelected
         });
         setLoading(false);
       } catch (error) {
@@ -58,8 +64,12 @@ const Dashboard = () => {
           <p className="value">{stats.totalApplicants}</p>
         </div>
         <div className="stat-card">
-          <h3>Total Eligible Students</h3>
+          <h3>Total Eligible</h3>
           <p className="value">{stats.totalEligible}</p>
+        </div>
+        <div className="stat-card" style={{borderColor: '#10b981'}}>
+          <h3 style={{color: '#10b981'}}>Total Selected</h3>
+          <p className="value" style={{color: '#10b981'}}>{stats.totalSelected}</p>
         </div>
       </div>
     </div>
