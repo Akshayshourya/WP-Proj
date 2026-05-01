@@ -7,6 +7,9 @@ const CompanyDetails = () => {
   const [company, setCompany] = useState(null);
   const [eligibleApplicants, setEligibleApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedApplicantId, setSelectedApplicantId] = useState(null);
+  const [marks, setMarks] = useState('');
 
   const fetchCompanyData = async () => {
     try {
@@ -28,10 +31,11 @@ const CompanyDetails = () => {
     fetchCompanyData();
   }, [id]);
 
-  const handleRoundUpdate = async (applicantId, status) => {
+  const handleRoundUpdate = async (applicantId, status, submittedMarks = null) => {
     try {
       await axios.put(`http://localhost:5000/companies/${id}/applicants/${applicantId}/round`, {
-        status
+        status,
+        marks: submittedMarks !== null ? submittedMarks : 0
       });
       // Refresh data
       fetchCompanyData();
@@ -39,6 +43,17 @@ const CompanyDetails = () => {
       console.error('Error updating round status:', error);
       alert('Error updating round');
     }
+  };
+
+  const handlePassClick = (applicantId) => {
+    setSelectedApplicantId(applicantId);
+    setMarks('');
+    setModalOpen(true);
+  };
+
+  const handleSubmitMarks = () => {
+    handleRoundUpdate(selectedApplicantId, 'Passed', Number(marks));
+    setModalOpen(false);
   };
 
   if (loading) return <div>Loading company details...</div>;
@@ -126,7 +141,7 @@ const CompanyDetails = () => {
                   <td>
                     {!isCompleted && !isFailed && !applicant.isShortlisted && (
                       <div style={{display: 'flex', gap: '0.5rem'}}>
-                        <button className="btn-success" onClick={() => handleRoundUpdate(applicant._id, 'Passed')}>Pass</button>
+                        <button className="btn-success" onClick={() => handlePassClick(applicant._id)}>Pass</button>
                         <button className="btn-danger" onClick={() => handleRoundUpdate(applicant._id, 'Failed')}>Fail</button>
                       </div>
                     )}
@@ -145,6 +160,28 @@ const CompanyDetails = () => {
           </tbody>
         </table>
       </div>
+
+      {modalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Enter Marks for Round</h3>
+            <div style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
+              <label style={{ marginRight: '1rem' }}>Marks (optional): </label>
+              <input 
+                type="number" 
+                value={marks} 
+                onChange={(e) => setMarks(e.target.value)}
+                placeholder="0"
+                style={{ width: '100px', padding: '0.5rem' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button className="btn-small" onClick={() => setModalOpen(false)}>Cancel</button>
+              <button className="btn-success" onClick={handleSubmitMarks}>Submit & Pass</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
