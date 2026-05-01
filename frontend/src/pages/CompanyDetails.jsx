@@ -10,6 +10,7 @@ const CompanyDetails = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedApplicantId, setSelectedApplicantId] = useState(null);
   const [marks, setMarks] = useState('');
+  const [maxMarks, setMaxMarks] = useState('');
 
   const fetchCompanyData = async () => {
     try {
@@ -31,11 +32,12 @@ const CompanyDetails = () => {
     fetchCompanyData();
   }, [id]);
 
-  const handleRoundUpdate = async (applicantId, status, submittedMarks = null) => {
+  const handleRoundUpdate = async (applicantId, status, submittedMarks = null, submittedMaxMarks = null) => {
     try {
       await axios.put(`http://localhost:5000/companies/${id}/applicants/${applicantId}/round`, {
         status,
-        marks: submittedMarks !== null ? submittedMarks : 0
+        marks: submittedMarks !== '' && submittedMarks !== null ? Number(submittedMarks) : null,
+        maxMarks: submittedMaxMarks !== '' && submittedMaxMarks !== null ? Number(submittedMaxMarks) : null
       });
       // Refresh data
       fetchCompanyData();
@@ -48,11 +50,12 @@ const CompanyDetails = () => {
   const handlePassClick = (applicantId) => {
     setSelectedApplicantId(applicantId);
     setMarks('');
+    setMaxMarks('');
     setModalOpen(true);
   };
 
   const handleSubmitMarks = () => {
-    handleRoundUpdate(selectedApplicantId, 'Passed', Number(marks));
+    handleRoundUpdate(selectedApplicantId, 'Passed', marks, maxMarks);
     setModalOpen(false);
   };
 
@@ -165,13 +168,23 @@ const CompanyDetails = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Enter Marks for Round</h3>
-            <div style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
-              <label style={{ marginRight: '1rem' }}>Marks (optional): </label>
+            <div style={{ marginBottom: '1rem', marginTop: '1rem' }}>
+              <label style={{ marginRight: '1rem' }}>Obtained Marks (optional): </label>
               <input 
                 type="number" 
                 value={marks} 
                 onChange={(e) => setMarks(e.target.value)}
-                placeholder="0"
+                placeholder=""
+                style={{ width: '100px', padding: '0.5rem' }}
+              />
+            </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ marginRight: '1rem' }}>Max Marks (optional): </label>
+              <input 
+                type="number" 
+                value={maxMarks} 
+                onChange={(e) => setMaxMarks(e.target.value)}
+                placeholder=""
                 style={{ width: '100px', padding: '0.5rem' }}
               />
             </div>

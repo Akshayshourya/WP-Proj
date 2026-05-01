@@ -57,7 +57,13 @@ const CandidateDetails = () => {
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{round.roundName}</td>
-                <td>{round.marks}</td>
+                <td>
+                  {round.marks === null || round.marks === undefined 
+                    ? 'N/A' 
+                    : round.maxMarks 
+                      ? `${round.marks} / ${round.maxMarks}` 
+                      : round.marks}
+                </td>
                 <td>
                   <span className={`status-badge status-${round.status.toLowerCase()}`}>
                     {round.status}

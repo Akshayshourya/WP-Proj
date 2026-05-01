@@ -61,7 +61,7 @@ exports.getEligibleApplicants = async (req, res) => {
 exports.updateApplicantRound = async (req, res) => {
   try {
     const { cid, aid } = req.params;
-    const { status, marks } = req.body;
+    const { status, marks, maxMarks } = req.body;
 
     const company = await Company.findById(cid);
     if (!company) return res.status(404).json({ message: 'Company not found' });
@@ -75,8 +75,12 @@ exports.updateApplicantRound = async (req, res) => {
 
     // Update current round status
     applicant.rounds[applicant.currentRound].status = status;
+    
     if (marks !== undefined) {
       applicant.rounds[applicant.currentRound].marks = marks;
+    }
+    if (maxMarks !== undefined) {
+      applicant.rounds[applicant.currentRound].maxMarks = maxMarks;
     }
 
     if (status === 'Passed') {
@@ -112,8 +116,16 @@ exports.updateApplicantOffer = async (req, res) => {
     const applicant = company.applicants.id(aid);
     if (!applicant) return res.status(404).json({ message: 'Applicant not found' });
 
+    if (applicant.offerLocked) {
+      return res.status(400).json({ message: 'Offer already finalized' });
+    }
+
     if (offerStatus !== undefined) applicant.offerStatus = offerStatus;
     if (baseOffer !== undefined) applicant.baseOffer = baseOffer;
+    
+    if (applicant.offerStatus !== 'Pending') {
+      applicant.offerLocked = true;
+    }
 
     await company.save();
     res.json(applicant);

@@ -5,7 +5,7 @@ import axios from 'axios';
 const Shortlisted = () => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [editedCandidates, setEditedCandidates] = useState({});
   const fetchShortlisted = async () => {
     try {
       const response = await axios.get('http://localhost:5000/companies/shortlisted/all');
@@ -21,12 +21,33 @@ const Shortlisted = () => {
     fetchShortlisted();
   }, []);
 
-  const handleOfferUpdate = async (companyId, applicantId, offerStatus, baseOffer) => {
+  const handleLocalChange = (applicantId, field, value) => {
+    setEditedCandidates(prev => ({
+      ...prev,
+      [applicantId]: {
+        ...prev[applicantId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSave = async (companyId, applicantId, originalStatus, originalOffer) => {
+    const edits = editedCandidates[applicantId] || {};
+    const finalStatus = edits.offerStatus !== undefined ? edits.offerStatus : originalStatus;
+    const finalOffer = edits.baseOffer !== undefined ? edits.baseOffer : originalOffer;
+
     try {
       await axios.put(`http://localhost:5000/companies/${companyId}/applicants/${applicantId}/offer`, {
-        offerStatus,
-        baseOffer
+        offerStatus: finalStatus,
+        baseOffer: finalOffer
       });
+      
+      setEditedCandidates(prev => {
+        const newState = { ...prev };
+        delete newState[applicantId];
+        return newState;
+      });
+      
       fetchShortlisted();
     } catch (error) {
       console.error('Error updating offer:', error);
@@ -54,7 +75,9 @@ const Shortlisted = () => {
           </thead>
           <tbody>
             {candidates.length > 0 ? (
-              candidates.map(candidate => (
+              candidates.map(candidate => {
+                const isEditable = candidate.offerStatus === "Pending";
+                return (
                 <tr key={`${candidate.companyId}-${candidate._id}`}>
                   <td>{candidate.name}</td>
                   <td>{candidate.roll}</td>
@@ -62,15 +85,17 @@ const Shortlisted = () => {
                   <td>
                     <input 
                       type="number" 
-                      defaultValue={candidate.baseOffer}
-                      onBlur={(e) => handleOfferUpdate(candidate.companyId, candidate._id, candidate.offerStatus, Number(e.target.value))}
+                      value={editedCandidates[candidate._id]?.baseOffer ?? candidate.baseOffer}
+                      onChange={(e) => handleLocalChange(candidate._id, 'baseOffer', Number(e.target.value))}
+                      disabled={!isEditable}
                       style={{width: '80px'}}
                     />
                   </td>
                   <td>
                     <select 
-                      value={candidate.offerStatus}
-                      onChange={(e) => handleOfferUpdate(candidate.companyId, candidate._id, e.target.value, candidate.baseOffer)}
+                      value={editedCandidates[candidate._id]?.offerStatus ?? candidate.offerStatus}
+                      onChange={(e) => handleLocalChange(candidate._id, 'offerStatus', e.target.value)}
+                      disabled={!isEditable}
                     >
                       <option value="Pending">Pending</option>
                       <option value="Accepted">Accepted</option>
@@ -79,13 +104,26 @@ const Shortlisted = () => {
                     </select>
                   </td>
                   <td>
-                    <button className="btn-small" onClick={() => handleOfferUpdate(candidate.companyId, candidate._id, candidate.offerStatus, candidate.baseOffer)}>Save</button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      {isEditable ? (
+                        <span className="status-badge status-pending">Editable</span>
+                      ) : (
+                        <span className="status-badge status-passed">🔒 Finalized</span>
+                      )}
+                      
+                      {isEditable ? (
+                        <button className="btn-success" onClick={() => handleSave(candidate.companyId, candidate._id, candidate.offerStatus, candidate.baseOffer)}>Save</button>
+                      ) : (
+                        <button className="btn-small" disabled>Finalized</button>
+                      )}
+                    </div>
                   </td>
                   <td>
                     <Link to={`/candidate/${candidate.companyId}/${candidate._id}`} className="btn-small">View Round Details</Link>
                   </td>
                 </tr>
-              ))
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>No shortlisted candidates yet.</td>

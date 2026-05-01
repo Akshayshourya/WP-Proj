@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const Company = require('./models/Company');
 
 const createDefaultRounds = () => [
-  { roundName: 'Coding', status: 'Pending', marks: 0 },
-  { roundName: 'Technical', status: 'Pending', marks: 0 },
-  { roundName: 'HR', status: 'Pending', marks: 0 }
+  { roundName: 'Coding', status: 'Pending', marks: null, maxMarks: null },
+  { roundName: 'Technical', status: 'Pending', marks: null, maxMarks: null },
+  { roundName: 'HR', status: 'Pending', marks: null, maxMarks: null }
 ];
 
 const companiesData = [
